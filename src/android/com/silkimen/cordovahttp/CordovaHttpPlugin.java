@@ -30,8 +30,8 @@ public class CordovaHttpPlugin extends CordovaPlugin {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
   private TLSConfiguration tlsConfiguration;
-  private final TrustManager[] noOpTrustManagers;
-  private final HostnameVerifier noOpVerifier;
+  private TrustManager[] noOpTrustManagers;
+  private HostnameVerifier noOpVerifier;
   
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
