@@ -66,7 +66,6 @@ public class CordovaHttpPlugin extends CordovaPlugin {
         return true;
       }
     };
-  }
 
       this.tlsConfiguration.setHostnameVerifier(this.noOpVerifier);
       this.tlsConfiguration.setTrustManagers(this.noOpTrustManagers);
