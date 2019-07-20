@@ -16,12 +16,23 @@ import android.util.Log;
 import android.util.Base64;
 
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 
 public class CordovaHttpPlugin extends CordovaPlugin {
   private static final String TAG = "Cordova-Plugin-HTTP";
 
   private TLSConfiguration tlsConfiguration;
-
+  private final TrustManager[] noOpTrustManagers;
+  private final HostnameVerifier noOpVerifier;
+  
   @Override
   public void initialize(CordovaInterface cordova, CordovaWebView webView) {
     super.initialize(cordova, webView);
@@ -35,13 +46,36 @@ public class CordovaHttpPlugin extends CordovaPlugin {
 
       store.load(null);
       tmf.init(store);
+      
+      this.noOpTrustManagers = new TrustManager[] { new X509TrustManager() {
+      public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
+      }
 
-      this.tlsConfiguration.setHostnameVerifier(null);
-      this.tlsConfiguration.setTrustManagers(tmf.getTrustManagers());
+      public void checkClientTrusted(X509Certificate[] chain, String authType) {
+        // intentionally left blank
+      }
+
+      public void checkServerTrusted(X509Certificate[] chain, String authType) {
+        // intentionally left blank
+      }
+    } };
+
+    this.noOpVerifier = new HostnameVerifier() {
+      public boolean verify(String hostname, SSLSession session) {
+        return true;
+      }
+    };
+  }
+
+      this.tlsConfiguration.setHostnameVerifier(this.noOpVerifier);
+      this.tlsConfiguration.setTrustManagers(this.noOpTrustManagers);
     } catch (Exception e) {
       Log.e(TAG, "An error occured while loading system's CA certificates", e);
     }
   }
+  
+  
 
   @Override
   public boolean execute(String action, final JSONArray args, final CallbackContext callbackContext)
